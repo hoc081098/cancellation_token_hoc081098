@@ -75,52 +75,101 @@ Single<T> useCancellationToken<T>(
   return Single.safe(controller.stream);
 }
 
-/// Returns a Stream that emits a [SimpleCancellationException] as error event
-/// and a done event when the given [token] is cancelled.
-Stream<Never> onCancel(CancellationToken token) {
-  if (token.isCancelled) {
-    return Stream.error(const CancellationException());
-  }
-
-  final controller = StreamController<Never>(sync: true);
-  Completer<Never>? completer;
-  StreamSubscription<Never>? subscription;
-
-  void emitAndClose() {
-    controller.addError(const CancellationException());
-    controller.close();
-  }
-
-  controller.onListen = () {
-    if (token.isCancelled) {
-      emitAndClose();
-      return;
+/// Provide [onCancelStream] extension method on [CancellationToken].
+extension OnCancelStreamCancellationTokenExtension on CancellationToken {
+  /// Returns a Stream that emits a [SimpleCancellationException] as error event
+  /// and a done event when this token is cancelled.
+  ///
+  /// This return [Stream] can be used with `rxdart` [TakeUntilExtension.takeUntil] operator,
+  /// eg: `aStream.takeUntil(token.onCancelStream())`.
+  ///
+  /// ### Example
+  /// ```dart
+  /// final token = CancellationToken();
+  /// final stream = Rx.fromCallable(() async {
+  ///   print('start...');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 1');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 2');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('done...');
+  ///   return 42;
+  /// }).takeUntil(token.onCancelStream());
+  ///
+  /// stream.listen(print, onError: print);
+  ///
+  /// await Future<void>.delayed(const Duration(milliseconds: 120));
+  /// token.cancel();
+  ///
+  /// await Future<void>.delayed(const Duration(milliseconds: 800));
+  /// print('exit...');
+  /// ```
+  ///
+  /// The console will print:
+  /// ```
+  /// start...
+  /// Step 1
+  /// Instance of 'CancellationException'
+  /// exit
+  /// ```
+  Stream<Never> onCancelStream() {
+    if (isCancelled) {
+      return Stream.error(const CancellationException());
     }
 
-    completer = Completer<Never>();
-    token._addCompleter(completer!);
+    final controller = StreamController<Never>(sync: true);
+    Completer<Never>? completer;
+    StreamSubscription<Never>? subscription;
 
-    subscription = completer!.future.asStream().listen(
-      null,
-      onError: (Object error) {
-        if (error is CancellationException) {
-          emitAndClose();
-        }
-      },
-    );
-  };
-  controller.onCancel = () {
-    if (completer != null) {
-      token._removeCompleter(completer!);
-      completer = null;
+    void emitAndClose() {
+      controller.addError(const CancellationException());
+      controller.close();
     }
 
-    final future = subscription?.cancel();
-    subscription = null;
-    return future;
-  };
+    controller.onListen = () {
+      if (isCancelled) {
+        emitAndClose();
+        return;
+      }
 
-  return controller.stream;
+      completer = Completer<Never>();
+      _addCompleter(completer!);
+
+      subscription = completer!.future.asStream().listen(
+        null,
+        onError: (Object error) {
+          if (error is CancellationException) {
+            emitAndClose();
+          }
+        },
+      );
+    };
+    controller.onCancel = () {
+      if (completer != null) {
+        _removeCompleter(completer!);
+        completer = null;
+      }
+
+      final future = subscription?.cancel();
+      subscription = null;
+      return future;
+    };
+
+    return controller.stream;
+  }
 }
 
 /// Run [action] with a [CancellationToken].

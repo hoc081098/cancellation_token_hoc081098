@@ -1,6 +1,11 @@
+import 'dart:async';
+
 import 'package:cancellation_token_hoc081098/src/cancellation_token.dart';
+import 'package:rxdart_ext/rxdart_ext.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
+
+final isCancellationException = isA<CancellationException>();
 
 void main() {
   group('CancellationToken', () {
@@ -55,8 +60,88 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 100));
         token.cancel();
 
-        await expectLater(future, throwsA(isA<CancellationException>()));
+        await expectLater(future, throwsA(isCancellationException));
         expect(list, [1, 2, 3]);
+      });
+    });
+
+    group('onCancelStream', () {
+      test('takeUntil and cancel', () async {
+        final token = CancellationToken();
+        final steps = <String>[];
+
+        final stream = Rx.fromCallable(() async {
+          steps.add('start...');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 1');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 2');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('done...');
+          return 42;
+        }).takeUntil(token.onCancelStream());
+
+        expect(
+          stream,
+          emitsInOrder(
+            <Object>[
+              emitsError(isCancellationException),
+              emitsDone,
+            ],
+          ),
+        );
+
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        token.cancel();
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        expect(steps, ['start...', 'Step 1']);
+      });
+
+      test('cancel before listen #1', () {
+        final token = CancellationToken()..cancel();
+
+        expect(
+          token.onCancelStream(),
+          emitsInOrder(
+            <Object>[
+              emitsError(isCancellationException),
+              emitsDone,
+            ],
+          ),
+        );
+      });
+
+      test('cancel before listen #2', () async {
+        final token = CancellationToken();
+
+        Future<void>.delayed(const Duration(milliseconds: 50), () {
+          token.cancel();
+        });
+
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          token.onCancelStream(),
+          emitsInOrder(
+            <Object>[
+              emitsError(isCancellationException),
+              emitsDone,
+            ],
+          ),
+        );
       });
     });
   });
