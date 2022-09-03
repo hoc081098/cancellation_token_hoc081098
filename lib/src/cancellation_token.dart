@@ -88,6 +88,7 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
   /// eg: `aStream.takeUntil(token.onCancelStream())`.
   ///
   /// ### Example
+  ///
   /// ```dart
   /// final token = CancellationToken();
   /// final stream = Rx.fromCallable(() async {
@@ -184,6 +185,7 @@ extension GuardFutureCancellationTokenExtension on CancellationToken {
   /// Run [action] and throw a [SimpleCancellationException] when this token is cancelled.
   ///
   /// ### Example
+  ///
   /// ```dart
   /// final token = CancellationToken();
   /// final future = token.guardFuture(() async {
