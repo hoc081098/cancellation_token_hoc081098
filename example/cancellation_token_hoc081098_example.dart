@@ -1,24 +1,26 @@
 import 'package:cancellation_token_hoc081098/cancellation_token_hoc081098.dart';
+import 'package:rxdart_ext/utils.dart';
 
 void main() async {
   final token = CancellationToken();
+
   final future = token.guardFuture(() async {
     print('start...');
 
     token.guard();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await delay(100);
     token.guard();
 
     print('Step 1');
 
     token.guard();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await delay(100);
     token.guard();
 
     print('Step 2');
 
     token.guard();
-    await Future<void>.delayed(const Duration(milliseconds: 100));
+    await delay(100);
     token.guard();
 
     print('done...');
@@ -28,8 +30,8 @@ void main() async {
   // ignore: unawaited_futures
   future.then(print, onError: print);
 
-  await Future<void>.delayed(const Duration(milliseconds: 120));
+  await delay(120);
   token.cancel();
-  await Future<void>.delayed(const Duration(milliseconds: 800));
+  await delay(800);
   print('exit...');
 }
