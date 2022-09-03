@@ -241,4 +241,15 @@ extension GuardFutureCancellationTokenExtension on CancellationToken {
 class CancellationException implements Exception {
   /// Construct a [CancellationException].
   const CancellationException();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CancellationException && runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => 0;
+
+  @override
+  String toString() => 'CancellationException';
 }
