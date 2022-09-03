@@ -7,10 +7,14 @@ class CancellationToken {
   List<Completer<Never>>? _completers = <Completer<Never>>[];
   var _isCancelled = false;
 
-  /// TODO(docs)
+  /// Returns `true` if the token was cancelled.
   bool get isCancelled => _isCancelled;
 
-  /// Cancel this token.
+  /// Cancel all operations with this token.
+  /// If the token was already cancelled, this method does nothing.
+  ///
+  /// Calling this method will cancel all futures created by [guardFuture],
+  /// and cancel all [Single]s created by [useCancellationToken].
   void cancel() {
     if (_isCancelled) {
       return;
@@ -175,24 +179,20 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
   }
 }
 
-/// Run [action] with a [CancellationToken].
-Future<T> cancellationGuard<T>(
-  CancellationToken? token,
-  FutureOr<T> Function() action,
-) {
-  if (token == null) {
-    return Future.sync(action);
+/// Provide [guardFuture] extension method on [CancellationToken].
+extension GuardFutureCancellationTokenExtension on CancellationToken {
+  /// Run [action] and throw a [SimpleCancellationException] when this token is cancelled.
+  Future<T> guardFuture<T>(FutureOr<T> Function() action) {
+    if (isCancelled) {
+      return Future.error(const CancellationException());
+    }
+
+    final completer = Completer<Never>();
+    _addCompleter(completer);
+
+    return Future.any<T>([completer.future, Future.sync(action)])
+        .whenComplete(() => _removeCompleter(completer));
   }
-
-  if (token.isCancelled) {
-    return Future.error(const CancellationException());
-  }
-
-  final completer = Completer<Never>();
-  token._addCompleter(completer);
-
-  return Future.any<T>([completer.future, Future.sync(action)])
-      .whenComplete(() => token._removeCompleter(completer));
 }
 
 /// A exception that is used to indicate that a [CancellationToken] was cancelled.

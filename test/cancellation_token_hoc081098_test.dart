@@ -9,11 +9,24 @@ final isCancellationException = isA<CancellationException>();
 
 void main() {
   group('CancellationToken', () {
-    group('cancellationGuard', () {
+    group('isCancelled', () {
+      test('true', () {
+        final token = CancellationToken();
+        token.cancel();
+        expect(token.isCancelled, isTrue);
+      });
+
+      test('false', () {
+        final token = CancellationToken();
+        expect(token.isCancelled, isFalse);
+      });
+    });
+
+    group('guardFuture', () {
       test('do not cancel', () {
         {
           final token = CancellationToken();
-          final future = cancellationGuard(token, () async {
+          final future = token.guardFuture(() async {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             return 42;
           });
@@ -22,7 +35,7 @@ void main() {
 
         {
           final token = CancellationToken();
-          final future = cancellationGuard(token, () async {
+          final future = token.guardFuture(() async {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             throw Exception();
           });
@@ -33,7 +46,7 @@ void main() {
       test('cancel', () async {
         final list = <int>[];
         final token = CancellationToken();
-        final future = cancellationGuard(token, () async {
+        final future = token.guardFuture(() async {
           list.add(1);
 
           await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -155,6 +168,80 @@ void main() {
 
         await Future<void>.delayed(const Duration(milliseconds: 200));
         await subscription.cancel();
+      });
+    });
+
+    group('useCancellationToken', () {
+      test('do not cancel', () async {
+        final steps = <String>[];
+
+        final single = useCancellationToken((token) async {
+          steps.add('start...');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 1');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 2');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('done...');
+          return 42;
+        });
+
+        final subscription = single.listen(
+          expectAsync1((_) => expect(false, true), count: 0),
+          onError: expectAsync2((_, __) => expect(false, true), count: 0),
+          onDone: expectAsync0(() => expect(false, true), count: 0),
+        );
+
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        await subscription.cancel();
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+
+        expect(steps, ['start...', 'Step 1']);
+      });
+
+      test('do not cancel', () async {
+        final steps = <String>[];
+
+        final single = useCancellationToken((token) async {
+          steps.add('start...');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 1');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('Step 2');
+
+          token.guard();
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          token.guard();
+
+          steps.add('done...');
+          return 42;
+        });
+
+        await expectLater(
+          single,
+          emitsInOrder(<Object>[42, emitsDone]),
+        );
+        expect(steps, ['start...', 'Step 1', 'Step 2', 'done...']);
       });
     });
   });
