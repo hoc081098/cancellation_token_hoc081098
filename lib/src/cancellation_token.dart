@@ -182,6 +182,48 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
 /// Provide [guardFuture] extension method on [CancellationToken].
 extension GuardFutureCancellationTokenExtension on CancellationToken {
   /// Run [action] and throw a [SimpleCancellationException] when this token is cancelled.
+  ///
+  /// ### Example
+  /// ```dart
+  /// final token = CancellationToken();
+  /// final future = token.guardFuture(() async {
+  ///   print('start...');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 1');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 2');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('done...');
+  ///   return 42;
+  /// });
+  ///
+  /// future.then(print, onError: print);
+  ///
+  /// await Future<void>.delayed(const Duration(milliseconds: 120));
+  /// token.cancel();
+  /// await Future<void>.delayed(const Duration(milliseconds: 800));
+  /// print('exit...');
+  /// ```
+  ///
+  /// The console will print:
+  /// ```
+  /// start...
+  /// Step 1
+  /// Instance of 'CancellationException'
+  /// exit...
+  /// ```
   Future<T> guardFuture<T>(FutureOr<T> Function() action) {
     if (isCancelled) {
       return Future.error(const CancellationException());
