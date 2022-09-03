@@ -152,6 +152,9 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
         null,
         onError: (Object error) {
           if (error is CancellationException) {
+            // [CancellationToken.cancel] clears the [CancellationToken._completers] list,
+            // so we clear the [completer] here.
+            completer = null;
             emitAndClose();
           }
         },

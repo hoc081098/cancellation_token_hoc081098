@@ -143,6 +143,19 @@ void main() {
           ),
         );
       });
+
+      test('do not cancel', () async {
+        final token = CancellationToken();
+
+        final subscription = token.onCancelStream().listen(
+              expectAsync1((_) => expect(false, true), count: 0),
+              onError: expectAsync2((_, __) => expect(false, true), count: 0),
+              onDone: expectAsync0(() => expect(false, true), count: 0),
+            );
+
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        await subscription.cancel();
+      });
     });
   });
 }
