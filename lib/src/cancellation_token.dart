@@ -79,13 +79,136 @@ Single<T> useCancellationToken<T>(
   return Single.safe(controller.stream);
 }
 
-/// Provide [onCancelStream] extension method on [CancellationToken].
-extension OnCancelStreamCancellationTokenExtension on CancellationToken {
-  /// Returns a Stream that emits a [SimpleCancellationException] as error event
-  /// and a done event when this token is cancelled.
+/// Provide [guardStream] extension method on [CancellationToken].
+extension GuardStreamCancellationTokenExtension on CancellationToken {
+  /// Returns a [Stream] forwards all events from the source [stream]
+  /// until this token is cancelled.
   ///
-  /// This return [Stream] can be used with `rxdart` [TakeUntilExtension.takeUntil] operator,
-  /// eg: `aStream.takeUntil(token.onCancelStream())`.
+  /// When cancelling this token, the result stream will emit a [SimpleCancellationException]
+  /// as an error event and followed by a done event.
+  ///
+  /// ### Example
+  ///
+  /// ```dart
+  /// final token = CancellationToken();
+  /// final stream = token.guardStream(Rx.fromCallable(() async {
+  ///   print('start...');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 1');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('Step 2');
+  ///
+  ///   token.guard();
+  ///   await Future<void>.delayed(const Duration(milliseconds: 100));
+  ///   token.guard();
+  ///
+  ///   print('done...');
+  ///   return 42;
+  /// }));
+  ///
+  /// stream.listen(print, onError: print);
+  ///
+  /// await Future<void>.delayed(const Duration(milliseconds: 120));
+  /// token.cancel();
+  ///
+  /// await Future<void>.delayed(const Duration(milliseconds: 800));
+  /// print('exit...');
+  /// ```
+  ///
+  /// The console will print:
+  /// ```
+  /// start...
+  /// Step 1
+  /// Instance of 'CancellationException'
+  /// exit
+  /// ```
+  Stream<T> guardStream<T>(Stream<T> stream) {
+    if (isCancelled) {
+      return Stream.error(const CancellationException());
+    }
+
+    final controller = StreamController<T>(sync: true);
+    Completer<Never>? completer;
+    StreamSubscription<T>? subscription;
+    StreamSubscription<Never>? completerSubscription;
+
+    void emitCancellationExceptionAndClose([
+      CancellationException? error,
+      StackTrace? st,
+    ]) {
+      if (error != null && st != null) {
+        controller.addError(error, st);
+      } else {
+        controller.addError(const CancellationException());
+      }
+      controller.close();
+    }
+
+    controller.onListen = () {
+      if (isCancelled) {
+        emitCancellationExceptionAndClose();
+        return;
+      }
+
+      completer = Completer<Never>();
+      _addCompleter(completer!);
+
+      completerSubscription = completer!.future.asStream().listen(
+        null,
+        onError: (Object error, StackTrace st) {
+          if (error is CancellationException) {
+            // [CancellationToken.cancel] clears the [CancellationToken._completers] list,
+            // so we clear the [completer] here.
+            completer = null;
+            emitCancellationExceptionAndClose(error, st);
+          }
+        },
+      );
+
+      subscription = stream.listen(
+        controller.add,
+        onError: controller.addError,
+        onDone: controller.close,
+      );
+    };
+    controller.onCancel = () {
+      if (completer != null) {
+        _removeCompleter(completer!);
+        completer = null;
+      }
+
+      final future1 = completerSubscription?.cancel();
+      final future2 = subscription?.cancel();
+
+      completerSubscription = null;
+      subscription = null;
+
+      return future1 != null && future2 != null
+          ? Future.wait([future1, future2])
+          : (future1 ?? future2);
+    };
+
+    return controller.stream;
+  }
+}
+
+/// Provide [guardedBy] extension method on [Stream].
+extension GuardedByStreamExtension<T> on Stream<T> {
+  /// Returns a [Stream] forwards all events from the source [stream]
+  /// until this token is cancelled.
+  ///
+  /// When cancelling this token, the result stream will emit a [SimpleCancellationException]
+  /// as an error event and followed by a done event.
+  ///
+  /// This is equivalent to `token.guardStream(this)`.
   ///
   /// ### Example
   ///
@@ -112,7 +235,7 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
   ///
   ///   print('done...');
   ///   return 42;
-  /// }).takeUntil(token.onCancelStream());
+  /// }).guardedBy(token);
   ///
   /// stream.listen(print, onError: print);
   ///
@@ -130,54 +253,7 @@ extension OnCancelStreamCancellationTokenExtension on CancellationToken {
   /// Instance of 'CancellationException'
   /// exit
   /// ```
-  Stream<Never> onCancelStream() {
-    if (isCancelled) {
-      return Stream.error(const CancellationException());
-    }
-
-    final controller = StreamController<Never>(sync: true);
-    Completer<Never>? completer;
-    StreamSubscription<Never>? subscription;
-
-    void emitAndClose() {
-      controller.addError(const CancellationException());
-      controller.close();
-    }
-
-    controller.onListen = () {
-      if (isCancelled) {
-        emitAndClose();
-        return;
-      }
-
-      completer = Completer<Never>();
-      _addCompleter(completer!);
-
-      subscription = completer!.future.asStream().listen(
-        null,
-        onError: (Object error) {
-          if (error is CancellationException) {
-            // [CancellationToken.cancel] clears the [CancellationToken._completers] list,
-            // so we clear the [completer] here.
-            completer = null;
-            emitAndClose();
-          }
-        },
-      );
-    };
-    controller.onCancel = () {
-      if (completer != null) {
-        _removeCompleter(completer!);
-        completer = null;
-      }
-
-      final future = subscription?.cancel();
-      subscription = null;
-      return future;
-    };
-
-    return controller.stream;
-  }
+  Stream<T> guardedBy(CancellationToken token) => token.guardStream(this);
 }
 
 /// Provide [guardFuture] extension method on [CancellationToken].

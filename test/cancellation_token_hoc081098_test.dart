@@ -27,7 +27,7 @@ void main() {
         {
           final token = CancellationToken();
           final future = token.guardFuture(() async {
-            await Future<void>.delayed(const Duration(milliseconds: 100));
+            await delay(100);
             return 42;
           });
           expect(future, completion(42));
@@ -36,7 +36,7 @@ void main() {
         {
           final token = CancellationToken();
           final future = token.guardFuture(() async {
-            await Future<void>.delayed(const Duration(milliseconds: 100));
+            await delay(100);
             throw Exception();
           });
           expect(future, throwsException);
@@ -49,7 +49,7 @@ void main() {
         final future = token.guardFuture(() async {
           list.add(1);
 
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
 
           list.add(2);
 
@@ -57,20 +57,20 @@ void main() {
 
           list.add(3);
 
-          await Future<void>.delayed(const Duration(milliseconds: 500));
+          await delay(500);
 
           list.add(4);
 
           token.guard();
 
-          await Future<void>.delayed(const Duration(milliseconds: 500));
+          await delay(500);
 
           list.add(5);
 
           return 42;
         });
 
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await delay(100);
         token.cancel();
 
         await expectLater(future, throwsA(isCancellationException));
@@ -78,8 +78,8 @@ void main() {
       });
     });
 
-    group('onCancelStream', () {
-      test('takeUntil and cancel', () async {
+    group('guardStream / guardedBy', () {
+      test('cancel', () async {
         final token = CancellationToken();
         final steps = <String>[];
 
@@ -87,24 +87,24 @@ void main() {
           steps.add('start...');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 1');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 2');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('done...');
           return 42;
-        }).takeUntil(token.onCancelStream());
+        }).guardedBy(token);
 
         expect(
           stream,
@@ -116,9 +116,9 @@ void main() {
           ),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 120));
+        await delay(120);
         token.cancel();
-        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await delay(500);
 
         expect(steps, ['start...', 'Step 1']);
       });
@@ -127,7 +127,7 @@ void main() {
         final token = CancellationToken()..cancel();
 
         expect(
-          token.onCancelStream(),
+          Stream.value(1).guardedBy(token),
           emitsInOrder(
             <Object>[
               emitsError(isCancellationException),
@@ -140,14 +140,13 @@ void main() {
       test('cancel before listen #2', () async {
         final token = CancellationToken();
 
-        Future<void>.delayed(const Duration(milliseconds: 50), () {
-          token.cancel();
-        });
+        // ignore: unawaited_futures
+        delay(50).then((_) => token.cancel());
 
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await delay(100);
 
         expect(
-          token.onCancelStream(),
+          Stream.value(1).guardedBy(token),
           emitsInOrder(
             <Object>[
               emitsError(isCancellationException),
@@ -157,17 +156,58 @@ void main() {
         );
       });
 
+      test('cancel before listen #3', () async {
+        {
+          final token = CancellationToken()..cancel();
+
+          final stream = Stream.value(1)
+              .doOnListen(() => expect(false, true))
+              .guardedBy(token);
+
+          expect(
+            stream,
+            emitsInOrder(
+              <Object>[
+                emitsError(isCancellationException),
+                emitsDone,
+              ],
+            ),
+          );
+        }
+
+        {
+          final token = CancellationToken();
+
+          final stream = Stream.value(1)
+              .doOnListen(() => expect(false, true))
+              .guardedBy(token);
+
+          await delay(10);
+          token.cancel();
+
+          expect(
+            stream,
+            emitsInOrder(
+              <Object>[
+                emitsError(isCancellationException),
+                emitsDone,
+              ],
+            ),
+          );
+        }
+      });
+
       test('do not cancel', () async {
         final token = CancellationToken();
 
-        final subscription = token.onCancelStream().listen(
-              expectAsync1((_) => expect(false, true), count: 0),
-              onError: expectAsync2((_, __) => expect(false, true), count: 0),
-              onDone: expectAsync0(() => expect(false, true), count: 0),
-            );
-
-        await Future<void>.delayed(const Duration(milliseconds: 200));
-        await subscription.cancel();
+        await expectLater(
+          Stream.value(1).guardedBy(token),
+          emitsInOrder(<Object>[
+            emits(1),
+            emitsDone,
+          ]),
+        );
+        await delay(200);
       });
     });
 
@@ -179,19 +219,19 @@ void main() {
           steps.add('start...');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 1');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 2');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('done...');
@@ -204,9 +244,9 @@ void main() {
           onDone: expectAsync0(() => expect(false, true), count: 0),
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 120));
+        await delay(120);
         await subscription.cancel();
-        await Future<void>.delayed(const Duration(milliseconds: 500));
+        await delay(500);
 
         expect(steps, ['start...', 'Step 1']);
       });
@@ -218,19 +258,19 @@ void main() {
           steps.add('start...');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 1');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('Step 2');
 
           token.guard();
-          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await delay(100);
           token.guard();
 
           steps.add('done...');
