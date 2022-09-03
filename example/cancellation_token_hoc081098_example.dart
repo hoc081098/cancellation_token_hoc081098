@@ -25,6 +25,7 @@ void main() async {
     return 42;
   });
 
+  // ignore: unawaited_futures
   future.then(print, onError: print);
 
   await Future<void>.delayed(const Duration(milliseconds: 120));
