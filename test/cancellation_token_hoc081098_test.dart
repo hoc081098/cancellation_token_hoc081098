@@ -212,7 +212,7 @@ void main() {
     });
 
     group('useCancellationToken', () {
-      test('do not cancel', () async {
+      test('cancel', () async {
         final steps = <String>[];
 
         final single = useCancellationToken((token) async {

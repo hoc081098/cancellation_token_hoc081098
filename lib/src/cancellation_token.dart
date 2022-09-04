@@ -2,7 +2,16 @@ import 'dart:async';
 
 import 'package:rxdart_ext/single.dart';
 
-/// TODO(docs)
+/// A token for controlling the cancellation of async operations.
+/// A single token can be used for multiple async operations.
+///
+/// The token can be used with [Future] via [guardFuture] extension method,
+/// and with [Stream] via [guardStream] extension method.
+///
+/// See also:
+/// * [guardFuture]
+/// * [guardStream]
+/// * [GuardedByStreamExtension.guardedBy]
 class CancellationToken {
   List<Completer<Never>>? _completers = <Completer<Never>>[];
   var _isCancelled = false;
@@ -51,33 +60,28 @@ class CancellationToken {
       _completers?.remove(completer);
 }
 
-/// TODO(docs)
+/// Returns a [Single] that, when listening to it, calls a [block] function you specify
+/// and then emits the value returned from that function.
+///
+/// When the future which is returned from [block] completes, this [Single] will fire one event, either
+/// data or error, and then close with a done-event.
+///
+/// When stream subscription is cancelled (call [StreamSubscription.cancel] or `Stream.listen(cancelOnError: true)`),
+/// [CancellationToken.cancel] will be called, so we can cancel [block]
+/// (because [CancellationToken.guard] will throw a [CancellationException]).
+///
+/// We should use [CancellationToken.guard] or [CancellationToken.isCancelled]
+/// inside [block] to check if the token was cancelled.
 Single<T> useCancellationToken<T>(
-    Future<T> Function(CancellationToken cancelToken) block) {
-  final controller = StreamController<T>(sync: true);
-
-  CancellationToken? cancelToken;
-  StreamSubscription<T>? subscription;
-
-  controller.onListen = () =>
-      subscription = block(cancelToken = CancellationToken()).asStream().listen(
-            controller.add,
-            onError: controller.addError,
-            onDone: controller.close,
-          );
-  controller.onCancel = () {
-    final future = subscription?.cancel();
-    subscription = null;
-
-    cancelToken?.cancel();
-    cancelToken = null;
-
-    return future;
-  };
-
-  // ignore: invalid_use_of_internal_member
-  return Single.safe(controller.stream);
-}
+        Future<T> Function(CancellationToken cancelToken) block) =>
+    // ignore: invalid_use_of_internal_member
+    Single.safe(
+      Rx.using<T, CancellationToken>(
+        () => CancellationToken(),
+        (token) => block(token).asStream(),
+        (token) => token.cancel(),
+      ),
+    );
 
 /// Provide [guardStream] extension method on [CancellationToken].
 extension GuardStreamCancellationTokenExtension on CancellationToken {
