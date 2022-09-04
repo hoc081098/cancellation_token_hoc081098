@@ -1,18 +1,18 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# cancellation_token_hoc081098
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
+## Author: [Petrus Nguyễn Thái Học](https://github.com/hoc081098)
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
+![Dart CI](https://github.com/hoc081098/cancellation_token_hoc081098/workflows/Dart%20CI/badge.svg)
+[![Pub](https://img.shields.io/pub/v/cancellation_token_hoc081098)](https://pub.dev/packages/cancellation_token_hoc081098)
+[![Pub](https://img.shields.io/pub/v/cancellation_token_hoc081098?include_prereleases)](https://pub.dev/packages/cancellation_token_hoc081098)
+[![codecov](https://codecov.io/gh/hoc081098/cancellation_token_hoc081098/branch/master/graph/badge.svg)](https://codecov.io/gh/hoc081098/cancellation_token_hoc081098)
+[![GitHub](https://img.shields.io/github/license/hoc081098/cancellation_token_hoc081098?color=4EB1BA)](https://opensource.org/licenses/MIT)
+[![Style](https://img.shields.io/badge/style-lints-40c4ff.svg)](https://pub.dev/packages/lints)
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhoc081098%2Fcancellation_token_hoc081098&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Dart Cancellation Token.
+Inspired by CancellationToken in C#.
+A Dart utility package for easy async task cancellation.
 
 ## Features
 

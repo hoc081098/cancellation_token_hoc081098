@@ -1,6 +1,8 @@
-/// Support for doing something awesome.
+/// ## Author: [Petrus Nguyễn Thái Học](https://github.com/hoc081098)
 ///
-/// More dartdocs go here.
+/// Dart Cancellation Token.
+/// Inspired by CancellationToken in C#.
+/// A Dart utility package for easy async task cancellation.
 library cancellation_token_hoc081098;
 
 export 'src/cancellation_token.dart';
