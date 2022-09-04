@@ -212,7 +212,7 @@ void main() {
     });
 
     group('useCancellationToken', () {
-      test('cancel', () async {
+      test('cancel #1', () async {
         final steps = <String>[];
 
         final single = useCancellationToken((token) async {
@@ -249,6 +249,18 @@ void main() {
         await delay(500);
 
         expect(steps, ['start...', 'Step 1']);
+      });
+
+      test('cancel #2', () async {
+        late final CancellationToken token;
+
+        final single = useCancellationToken((cancelToken) async {
+          token = cancelToken;
+          return 42;
+        });
+
+        await single.listen(null).cancel();
+        expect(token.isCancelled, isTrue);
       });
 
       test('do not cancel', () async {
