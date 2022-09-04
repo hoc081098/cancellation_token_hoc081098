@@ -16,20 +16,75 @@ A Dart utility package for easy async task cancellation.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+ - [x] Reuse a single `CancellationToken` for multiple tasks, and cancel all of them with a single call to `CancellationToken.cancel()`.
+ - [x] Cancel futures and clean-up resources with `token.guardFuture(block)`.
+ - [x] Cancel streams and clean-up resources with `token.guardStream(stream)`/`Stream.guardedBy(token)`.
+ - [x] Integration with `rxdart`/`rxdart_ext` with `useCancellationToken`. 
+ - [x] Very simple, lightweight, and easy to use.
 
 ## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+### 1. Add dependency
+
+```yaml
+dependencies:
+  cancellation_token_hoc081098: <latest_version>
+```
+
+### 2. Import
+
+```dart
+import 'package:cancellation_token_hoc081098/cancellation_token_hoc081098.dart';
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+### 1. `guardFuture`
 
 ```dart
-const like = 'sample';
+void main() async {
+  // Create a CancellationToken
+  final token = CancellationToken();
+
+  // Simulate a long-running task
+  Future<void> doWork(int number) async {
+    print('doWork($number) started');
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    print('doWork($number) finished');
+  }
+
+  // Guard a future
+  final future = token.guardFuture(() async {
+    for (var i = 0; i < 10; i++) {
+      token.guard(); // Throws if token is cancelled
+      await doWork(i);
+      token.guard(); // Throws if token is cancelled
+    }
+    return 42;
+  });
+
+  future
+      .then((v) => print('Result: $v'))
+      .onError<Object>((e, st) => print('Error: $e'));
+
+  // Cancel the token after 300ms
+  await Future<void>.delayed(const Duration(milliseconds: 300));
+
+  // Cancel the token
+  token.cancel();
+
+  // Wait a little longer to ensure that the future is cancelled
+  await Future<void>.delayed(const Duration(seconds: 2));
+
+  // Output:
+  // doWork(0) started
+  // doWork(0) finished
+  // doWork(1) started
+  // doWork(1) finished
+  // doWork(2) started
+  // Error: CancellationException.
+  // doWork(2) finished
+}
 ```
 
 ## Additional information
