@@ -87,8 +87,14 @@ void main() async {
 }
 ```
 
-## Additional information
+## Features and bugs
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+Please file feature requests and bugs at the [issue tracker](https://github.com/hoc081098/cancellation_token_hoc081098/issues).
+
+## License
+
+```
+MIT License
+
+Copyright (c) 2022 Petrus Nguyễn Thái Học
+```
