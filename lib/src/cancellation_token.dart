@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:rxdart_ext/single.dart';
 
+import 'cancellation_exception.dart';
+
 /// A token for controlling the cancellation of async operations.
 /// A single token can be used for multiple async operations.
 ///
@@ -317,21 +319,4 @@ extension GuardFutureCancellationTokenExtension on CancellationToken {
     return Future.any<T>([completer.future, Future.sync(action)])
         .whenComplete(() => _removeCompleter(completer));
   }
-}
-
-/// A exception that is used to indicate that a [CancellationToken] was cancelled.
-class CancellationException implements Exception {
-  /// Construct a [CancellationException].
-  const CancellationException();
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CancellationException && runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => 0;
-
-  @override
-  String toString() => 'CancellationException';
 }

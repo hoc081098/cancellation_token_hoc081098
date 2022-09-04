@@ -5,4 +5,5 @@
 /// A Dart utility package for easy async task cancellation.
 library cancellation_token_hoc081098;
 
+export 'src/cancellation_exception.dart';
 export 'src/cancellation_token.dart';
