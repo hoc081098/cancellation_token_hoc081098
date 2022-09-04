@@ -76,6 +76,11 @@ void main() {
         await expectLater(future, throwsA(isCancellationException));
         expect(list, [1, 2, 3]);
       });
+
+      test('cancel before', () async {
+        final token = CancellationToken()..cancel();
+        expect(token.guardFuture(() => 1), throwsA(isCancellationException));
+      });
     });
 
     group('guardStream / guardedBy', () {
@@ -295,6 +300,15 @@ void main() {
         );
         expect(steps, ['start...', 'Step 1', 'Step 2', 'done...']);
       });
+    });
+  });
+
+  group('CancellationException', () {
+    test('toString', () {
+      expect(
+        const CancellationException().toString(),
+        'CancellationException',
+      );
     });
   });
 }

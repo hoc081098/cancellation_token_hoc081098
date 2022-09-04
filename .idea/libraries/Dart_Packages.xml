@@ -117,6 +117,7 @@
         <entry key="lints">
           <value>
             <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/lints-2.0.0/lib" />
               <option value="$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/lints-1.0.1/lib" />
             </list>
           </value>
@@ -358,6 +359,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/io-1.0.3/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/js-0.6.4/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/lints-1.0.1/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/lints-2.0.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/logging-1.0.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/matcher-0.12.12/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dartlang.org/meta-1.8.0/lib" />
