@@ -73,7 +73,7 @@ class CancellationToken {
 /// (because [CancellationToken.guard] will throw a [CancellationException]).
 ///
 /// We should use [CancellationToken.guard] or [CancellationToken.isCancelled]
-/// inside [block] to check if the token was cancelled.\
+/// inside [block] to check if the token was cancelled.
 ///
 /// The return [Single] is a single-subscription stream (ie. it can only be listened once).
 Single<T> useCancellationToken<T>(
