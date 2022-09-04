@@ -2,7 +2,7 @@
 
 ## Author: [Petrus Nguyễn Thái Học](https://github.com/hoc081098)
 
-![Dart CI](https://github.com/hoc081098/cancellation_token_hoc081098/workflows/Dart%20CI/badge.svg)
+[![Dart CI](https://github.com/hoc081098/cancellation_token_hoc081098/actions/workflows/dart.yml/badge.svg)](https://github.com/hoc081098/cancellation_token_hoc081098/actions/workflows/dart.yml)
 [![Pub](https://img.shields.io/pub/v/cancellation_token_hoc081098)](https://pub.dev/packages/cancellation_token_hoc081098)
 [![Pub](https://img.shields.io/pub/v/cancellation_token_hoc081098?include_prereleases)](https://pub.dev/packages/cancellation_token_hoc081098)
 [![codecov](https://codecov.io/gh/hoc081098/cancellation_token_hoc081098/branch/master/graph/badge.svg)](https://codecov.io/gh/hoc081098/cancellation_token_hoc081098)

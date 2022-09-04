@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cancellation_token_hoc081098/src/cancellation_token.dart';
+import 'package:cancellation_token_hoc081098/cancellation_token_hoc081098.dart';
 import 'package:rxdart_ext/rxdart_ext.dart';
 import 'package:test/expect.dart';
 import 'package:test/scaffolding.dart';
