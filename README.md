@@ -136,6 +136,53 @@ void main() async {
 }
 ```
 
+### 3. `useCancellationToken`
+
+```dart
+import 'package:rxdart_ext/rxdart_ext.dart';
+
+void main() async {
+  // Simulate a long-running task
+  Future<void> doWork(int number) async {
+    print('doWork($number) started');
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    print('doWork($number) finished');
+  }
+
+  // useCancellationToken
+  final Single<int> single = useCancellationToken((cancelToken) async {
+    for (var i = 0; i < 10; i++) {
+      cancelToken.guard(); // Throws if token is cancelled
+      await doWork(i);
+      cancelToken.guard(); // Throws if token is cancelled
+    }
+    return 42;
+  });
+
+  final subscription = single
+      .doOnData((v) => print('Result: $v'))
+      .doOnError((e, st) => print('Error: $e'))
+      .listen(null);
+
+  // Cancel the subscription after 300ms
+  await Future<void>.delayed(const Duration(milliseconds: 300));
+
+  // Cancel the subscription
+  await subscription.cancel();
+
+  // Wait a little longer to ensure that the stream is cancelled
+  await Future<void>.delayed(const Duration(seconds: 2));
+
+  // Output:
+  // doWork(0) started
+  // doWork(0) finished
+  // doWork(1) started
+  // doWork(1) finished
+  // doWork(2) started
+  // doWork(2) finished
+}
+```
+
 ## Features and bugs
 
 Please file feature requests and bugs at the [issue tracker](https://github.com/hoc081098/cancellation_token_hoc081098/issues).
