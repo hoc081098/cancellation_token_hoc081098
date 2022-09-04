@@ -53,7 +53,7 @@ void main() async {
     print('doWork($number) finished');
   }
 
-  // Guard a future
+  // Guard a Future
   final future = token.guardFuture(() async {
     for (var i = 0; i < 10; i++) {
       token.guard(); // Throws if token is cancelled
@@ -73,7 +73,7 @@ void main() async {
   // Cancel the token
   token.cancel();
 
-  // Wait a little longer to ensure that the future is cancelled
+  // Wait a little longer to ensure that the Future is cancelled
   await Future<void>.delayed(const Duration(seconds: 2));
 
   // Output:
@@ -82,7 +82,56 @@ void main() async {
   // doWork(1) started
   // doWork(1) finished
   // doWork(2) started
-  // Error: CancellationException.
+  // Error: CancellationException
+  // doWork(2) finished
+}
+```
+
+### 2. `guardStream`
+
+```dart
+void main() async {
+  // Create a CancellationToken
+  final token = CancellationToken();
+
+  // Simulate a long-running task
+  Future<void> doWork(int number) async {
+    print('doWork($number) started');
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    print('doWork($number) finished');
+  }
+
+  // Guard a Stream
+  final stream = Rx.fromCallable(() async {
+    for (var i = 0; i < 10; i++) {
+      token.guard(); // Throws if token is cancelled
+      await doWork(i);
+      token.guard(); // Throws if token is cancelled
+    }
+    return 42;
+  }).guardedBy(token);
+
+  stream
+      .doOnData((v) => print('Result: $v'))
+      .doOnError((e, st) => print('Error: $e'))
+      .listen(null);
+
+  // Cancel the token after 300ms
+  await Future<void>.delayed(const Duration(milliseconds: 300));
+
+  // Cancel the token
+  token.cancel();
+
+  // Wait a little longer to ensure that the stream is cancelled
+  await Future<void>.delayed(const Duration(seconds: 2));
+
+  // Output:
+  // doWork(0) started
+  // doWork(0) finished
+  // doWork(1) started
+  // doWork(1) finished
+  // doWork(2) started
+  // Error: CancellationException
   // doWork(2) finished
 }
 ```
