@@ -1,5 +1,5 @@
 import 'package:cancellation_token_hoc081098/cancellation_token_hoc081098.dart';
-import 'package:rxdart_ext/utils.dart';
+import 'package:rxdart_ext/rxdart_ext.dart';
 
 void main() async {
   await guardFutureExample();

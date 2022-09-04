@@ -26,6 +26,9 @@ jobs:
       - name: Print Dart version
         run: dart --version
 
+      - name: Install dependencies
+        run: dart pub get
+
       - name: Run example
         run: |
           dart run cancellation_token_hoc081098_example.dart
