@@ -31,4 +31,4 @@ jobs:
 
       - name: Run example
         run: |
-          dart run cancellation_token_hoc081098_example.dart
+          dart run lib/cancellation_token_hoc081098_example.dart
