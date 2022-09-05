@@ -15,7 +15,7 @@ import 'cancellation_exception.dart';
 /// * [guardStream]
 /// * [GuardedByStreamExtension.guardedBy]
 class CancellationToken {
-  List<Completer<Never>>? _completers = <Completer<Never>>[];
+  List<Completer<Never>>? _completers;
   var _isCancelled = false;
 
   /// Returns `true` if the token was cancelled.
@@ -32,11 +32,18 @@ class CancellationToken {
     }
     _isCancelled = true;
 
-    final completers = [..._completers!];
-    _completers!.clear();
+    final completers = _completers;
+
+    if (completers == null || completers.isEmpty) {
+      _completers = null;
+      return;
+    }
+
+    final copiedCompleters = [...completers];
+    completers.clear();
     _completers = null;
 
-    for (final completer in completers) {
+    for (final completer in copiedCompleters) {
       completer.completeError(const CancellationException());
     }
   }
@@ -54,7 +61,7 @@ class CancellationToken {
     if (_isCancelled) {
       completer.completeError(const CancellationException());
     } else {
-      _completers?.add(completer);
+      (_completers ??= []).add(completer);
     }
   }
 
