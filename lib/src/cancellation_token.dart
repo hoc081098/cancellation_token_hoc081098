@@ -39,7 +39,7 @@ class CancellationToken {
       return;
     }
 
-    final copiedCompleters = [...completers];
+    final copiedCompleters = completers.toList(growable: false);
     completers.clear();
     _completers = null;
 
