@@ -19,7 +19,7 @@ A Dart utility package for easy async task cancellation.
  - [x] **Reuse** a single `CancellationToken` for multiple tasks, and **cancel all** of them with a single call to `CancellationToken.cancel()`.
  - [x] **Cancel futures** and clean-up resources with `token.guardFuture(block)`.
  - [x] **Cancel streams** and clean-up resources with `token.guardStream(stream)`/`Stream.guardedBy(token)`.
- - [x] Integrate with **[rxdart](pub.dev/packages/rxdart)/[rxdart_ext](pub.dev/packages/rxdart_ext)** with `useCancellationToken`. 
+ - [x] Integrate with **[rxdart](https://pub.dev/packages/rxdart)/[rxdart_ext](https://pub.dev/packages/rxdart_ext)** with `useCancellationToken`. 
  - [x] Very **simple**, **lightweight**, **performant**, and **easy** to use.
 
 ## Getting started
