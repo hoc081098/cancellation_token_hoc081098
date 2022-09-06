@@ -1,6 +1,6 @@
 name: cancellation_token_hoc081098
 description: Dart Cancellation Token. Inspired by CancellationToken in C#. A Dart utility package for easy async task cancellation.
-version: 1.0.0-beta.01
+version: 1.0.0-beta.02
 homepage: https://github.com/hoc081098/cancellation_token_hoc081098.git
 repository: https://github.com/hoc081098/cancellation_token_hoc081098.git
 issue_tracker: https://github.com/hoc081098/cancellation_token_hoc081098/issues
