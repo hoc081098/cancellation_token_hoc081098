@@ -9,6 +9,18 @@ final isCancellationException = isA<CancellationException>();
 
 void main() {
   group('CancellationToken', () {
+    test('toString', () {
+      expect(
+        CancellationToken().toString(),
+        'CancellationToken { isCancelled: false }',
+      );
+
+      expect(
+        (CancellationToken()..cancel()).toString(),
+        'CancellationToken { isCancelled: true }',
+      );
+    });
+
     group('isCancelled', () {
       test('true', () {
         final token = CancellationToken();

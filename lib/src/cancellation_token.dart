@@ -67,6 +67,9 @@ class CancellationToken {
 
   void _removeCompleter(Completer<void> completer) =>
       _completers?.remove(completer);
+
+  @override
+  String toString() => 'CancellationToken { isCancelled: $_isCancelled }';
 }
 
 /// Returns a [Single] that, when listening to it, calls a [block] function you specify
