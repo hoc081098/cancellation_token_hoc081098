@@ -176,8 +176,7 @@ extension GuardStreamCancellationTokenExtension on CancellationToken {
         return;
       }
 
-      completer = Completer<Never>();
-      _addCompleter(completer!);
+      _addCompleter(completer = Completer<Never>());
 
       completerSubscription = completer!.future.asStream().listen(
         null,
@@ -196,6 +195,16 @@ extension GuardStreamCancellationTokenExtension on CancellationToken {
         onError: controller.addError,
         onDone: controller.close,
       );
+
+      controller
+        ..onPause = () {
+          completerSubscription!.pause();
+          subscription!.pause();
+        }
+        ..onResume = () {
+          completerSubscription!.resume();
+          subscription!.resume();
+        };
     };
     controller.onCancel = () {
       if (completer != null) {
