@@ -1,3 +1,7 @@
+## 1.0.0-beta.04 - Sep 16, 2022
+
+-  Refactor `guardStream` / `guardedBy`: pause and resume the returned `StreamSubscription` properly.
+
 ## 1.0.0-beta.03 - Sep 9, 2022
 
 - Override `CancellationToken.toString()` for better debugging.
