@@ -226,6 +226,38 @@ void main() {
         );
         await delay(200);
       });
+
+      test('pause resume', () async {
+        {
+          final subscription = Rx.timer(1, const Duration(milliseconds: 300))
+              .guardedBy(CancellationToken())
+              .listen(expectAsync1((v) => expect(v, 1), count: 1));
+
+          subscription.pause();
+          await delay(100);
+          subscription.resume();
+        }
+
+        {
+          final token = CancellationToken();
+
+          final subscription = Rx.timer(1, const Duration(milliseconds: 300))
+              .guardedBy(token)
+              .listen(
+                expectAsync1((_) => expect(false, true), count: 0),
+                onError: expectAsync1(
+                  (Object e) => expect(e, isCancellationException),
+                  count: 1,
+                ),
+              );
+
+          subscription.pause();
+          token.cancel();
+
+          await delay(100);
+          subscription.resume();
+        }
+      });
     });
 
     group('useCancellationToken', () {
