@@ -1,3 +1,7 @@
+## 1.0.0 - Sep 18, 2022
+
+-  This is our first stable release 🎉.
+
 ## 1.0.0-beta.04 - Sep 16, 2022
 
 -  Refactor `guardStream` / `guardedBy`: pause and resume the returned `StreamSubscription` properly.
