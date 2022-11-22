@@ -48,7 +48,7 @@ class CancellationToken {
     }
   }
 
-  /// Throw a [SimpleCancellationException] if this token was cancelled.
+  /// Throw a [CancellationException] if this token was cancelled.
   /// This function should be used in async functions.
   /// For synchronous functions use [isCancelled] instead.
   void guard() {
@@ -102,7 +102,7 @@ extension GuardStreamCancellationTokenExtension on CancellationToken {
   /// Returns a [Stream] forwards all events from the source [stream]
   /// until this token is cancelled.
   ///
-  /// When cancelling this token, the result stream will emit a [SimpleCancellationException]
+  /// When cancelling this token, the result stream will emit a [CancellationException]
   /// as an error event and followed by a done event.
   ///
   /// ### Example
@@ -232,7 +232,7 @@ extension GuardedByStreamExtension<T> on Stream<T> {
   /// Returns a [Stream] forwards all events from the source [stream]
   /// until this token is cancelled.
   ///
-  /// When cancelling this token, the result stream will emit a [SimpleCancellationException]
+  /// When cancelling this token, the result stream will emit a [CancellationException]
   /// as an error event and followed by a done event.
   ///
   /// This is equivalent to `token.guardStream(this)`.
@@ -285,7 +285,7 @@ extension GuardedByStreamExtension<T> on Stream<T> {
 
 /// Provide [guardFuture] extension method on [CancellationToken].
 extension GuardFutureCancellationTokenExtension on CancellationToken {
-  /// Run [action] and throw a [SimpleCancellationException] when this token is cancelled.
+  /// Run [action] and throw a [CancellationException] when this token is cancelled.
   ///
   /// ### Example
   ///
