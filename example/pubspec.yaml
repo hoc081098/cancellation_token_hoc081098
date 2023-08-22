@@ -3,7 +3,7 @@ description: cancellation_token_hoc081098_example
 version: 1.0.0
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: '<4.0.0'
 
 dependencies:
   meta: ^1.8.0
