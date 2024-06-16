@@ -7,7 +7,7 @@ environment:
 
 dependencies:
   meta: ^1.8.0
-  rxdart_ext: ^0.2.5
+  rxdart_ext: ^0.3.0
   cancellation_token_hoc081098:
 
 dev_dependencies:
