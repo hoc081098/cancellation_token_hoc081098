@@ -1,6 +1,6 @@
 name: cancellation_token_hoc081098_example
 description: cancellation_token_hoc081098_example
-version: 1.0.0
+version: 2.0.0
 
 environment:
   sdk: ^3.0.0
