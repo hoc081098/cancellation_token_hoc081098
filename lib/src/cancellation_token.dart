@@ -14,7 +14,7 @@ import 'cancellation_exception.dart';
 /// * [guardFuture]
 /// * [guardStream]
 /// * [GuardedByStreamExtension.guardedBy]
-class CancellationToken {
+final class CancellationToken {
   List<Completer<Never>>? _completers;
   var _isCancelled = false;
 
@@ -88,13 +88,10 @@ class CancellationToken {
 /// The return [Single] is a single-subscription stream (ie. it can only be listened once).
 Single<T> useCancellationToken<T>(
         Future<T> Function(CancellationToken cancelToken) block) =>
-    // ignore: invalid_use_of_internal_member
-    Single.safe(
-      Rx.using<T, CancellationToken>(
-        () => CancellationToken(),
-        (token) => block(token).asStream(),
-        (token) => token.cancel(),
-      ),
+    RxSingles.using<T, CancellationToken>(
+      resourceFactory: () => CancellationToken(),
+      singleFactory: (token) => block(token).asSingle(),
+      disposer: (token) => token.cancel(),
     );
 
 /// Provide [guardStream] extension method on [CancellationToken].
@@ -329,7 +326,8 @@ extension GuardFutureCancellationTokenExtension on CancellationToken {
   /// Instance of 'CancellationException'
   /// exit...
   /// ```
-  Future<T> guardFuture<T>(FutureOr<T> Function() action) {
+  Future<T> guardFuture<T>(
+      FutureOr<T> Function(CancellationToken cancelToken) action) {
     if (isCancelled) {
       return Future.error(const CancellationException());
     }
@@ -337,7 +335,9 @@ extension GuardFutureCancellationTokenExtension on CancellationToken {
     final completer = Completer<Never>();
     _addCompleter(completer);
 
-    return Future.any<T>([completer.future, Future.sync(action)])
-        .whenComplete(() => _removeCompleter(completer));
+    return Future.any<T>([
+      completer.future,
+      Future.sync(() => action(this)),
+    ]).whenComplete(() => _removeCompleter(completer));
   }
 }

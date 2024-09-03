@@ -38,7 +38,7 @@ void main() {
       test('do not cancel', () {
         {
           final token = CancellationToken();
-          final future = token.guardFuture(() async {
+          final future = token.guardFuture((_) async {
             await delay(100);
             return 42;
           });
@@ -47,7 +47,7 @@ void main() {
 
         {
           final token = CancellationToken();
-          final future = token.guardFuture(() async {
+          final future = token.guardFuture((_) async {
             await delay(100);
             throw Exception();
           });
@@ -58,7 +58,7 @@ void main() {
       test('cancel', () async {
         final list = <int>[];
         final token = CancellationToken();
-        final future = token.guardFuture(() async {
+        final future = token.guardFuture((token) async {
           list.add(1);
 
           await delay(100);
@@ -91,7 +91,7 @@ void main() {
 
       test('cancel before', () async {
         final token = CancellationToken()..cancel();
-        expect(token.guardFuture(() => 1), throwsA(isCancellationException));
+        expect(token.guardFuture((_) => 1), throwsA(isCancellationException));
       });
     });
 
