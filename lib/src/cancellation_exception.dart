@@ -1,5 +1,5 @@
 /// A exception that is used to indicate that a [CancellationToken] was cancelled.
-class CancellationException implements Exception {
+final class CancellationException implements Exception {
   /// Construct a [CancellationException].
   const CancellationException();
 

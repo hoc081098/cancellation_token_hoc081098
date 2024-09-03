@@ -3,15 +3,15 @@ description: cancellation_token_hoc081098_example
 version: 1.0.0
 
 environment:
-  sdk: '>=2.17.0 <3.0.0'
+  sdk: ^3.0.0
 
 dependencies:
-  meta: ^1.8.0
-  rxdart_ext: ^0.2.5
+  meta: ^1.15.0
+  rxdart_ext: ^0.3.0
   cancellation_token_hoc081098:
 
 dev_dependencies:
-  lints: ^2.0.0
+  lints: ^3.0.0
 
 dependency_overrides:
   cancellation_token_hoc081098:
