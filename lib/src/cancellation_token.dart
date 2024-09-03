@@ -84,6 +84,7 @@ final class CancellationToken {
 ///
 /// We should use [CancellationToken.guard] or [CancellationToken.isCancelled]
 /// inside [block] to check if the token was cancelled.
+/// Usually, it is used after `await` statements.
 ///
 /// The return [Single] is a single-subscription stream (ie. it can only be listened once).
 Single<T> useCancellationToken<T>(
@@ -283,6 +284,10 @@ extension GuardedByStreamExtension<T> on Stream<T> {
 /// Provide [guardFuture] extension method on [CancellationToken].
 extension GuardFutureCancellationTokenExtension on CancellationToken {
   /// Run [action] and throw a [CancellationException] when this token is cancelled.
+  ///
+  /// We should use [CancellationToken.guard] or [CancellationToken.isCancelled]
+  /// inside [action] to check if the token was cancelled.
+  /// Usually, it is used after `await` statements.
   ///
   /// ### Example
   ///
