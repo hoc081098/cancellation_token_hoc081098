@@ -20,10 +20,10 @@ packages:
     dependency: transitive
     description:
       name: dart_either
-      sha256: "928895b8266ac5906eb4e2993fead563a73b17fc86eec6b40172100d56ca2507"
+      sha256: "2f84b82ee609c26bfa5d9fc8717daa7020ee7c712a29578bd9bedb6fe7439fad"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "2.5.0"
   lints:
     dependency: "direct dev"
     description:
@@ -44,10 +44,10 @@ packages:
     dependency: transitive
     description:
       name: path
-      sha256: db9d4f58c908a4ba5953fcee2ae317c94889433e5024c27ce74a37f94267945b
+      sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
       url: "https://pub.dev"
     source: hosted
-    version: "1.8.2"
+    version: "1.9.1"
   rxdart:
     dependency: transitive
     description:
@@ -60,17 +60,17 @@ packages:
     dependency: "direct main"
     description:
       name: rxdart_ext
-      sha256: "95df7e8b13140e2c3fdb3b943569a51f18090e82aaaf6ca6e8e6437e434a6fb0"
+      sha256: "9d6fcf38d3e125c1ccf0b4eaf50e1838e613f91c33bf5608fc9c036e3a9f453c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   stack_trace:
     dependency: transitive
     description:
       name: stack_trace
-      sha256: f8d9f247e2f9f90e32d1495ff32dac7e4ae34ffa7194c5ff8fcc0fd0e52df774
+      sha256: "277654b3034d17ac6f9f1cb5595db011b1d5d41e8806866db28e0abaa101c490"
       url: "https://pub.dev"
     source: hosted
-    version: "1.10.0"
+    version: "1.12.2"
 sdks:
-  dart: ">=3.0.0 <4.0.0"
+  dart: ">=3.4.0 <4.0.0"

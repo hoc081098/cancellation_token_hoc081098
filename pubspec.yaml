@@ -18,7 +18,7 @@ topics:
   - cancellation
 
 dependencies:
-  rxdart_ext: ^0.3.0
+  rxdart_ext: ^0.4.0
 
 dev_dependencies:
   lints: ^3.0.0
